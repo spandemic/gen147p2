@@ -1,12 +1,14 @@
 /* exported setup, draw */
-let seed = 12345;
+let seed = 143;
 
-const grassColor = "#e1ac4a";
-const skyColor = "#cdd8e6";
-const hillColor = "#1e273f";
-const treeColor = "#3d1803";
-const leaveColor = "#233610";
-const sunColor = [254,254,254,80]; // with opacity
+let landColor = "#3d023a";
+let skyColor = "#cdd8e6";
+let hillColor = "#1e273f";
+let buildColor = "#ff4800";
+let oceanColor = "#0b254a";
+let sunColor = "#e3d409";
+
+let value = 0;
 
 function preload() {
     // runs before setup 
@@ -26,100 +28,66 @@ function draw() {
   noStroke();
 
   fill(skyColor);
-  rect(0, 0, width, height / 2);
+  rect(0, 0, width, height * 2 / 3);
 
-  // An example of making something respond to the mouse
-  fill(...sunColor);
-  ellipse(mouseX,0,30,30);
-  ellipse(mouseX,0,50,50);
-  ellipse(mouseX,0,100,100);
-  ellipse(mouseX,0,200,200);
+  fill(sunColor);
+  ellipse(650, mouseY, 100, 100);
 
-  fill(grassColor);
-  rect(0, height / 2, width, height / 2);
+  fill(oceanColor);
+  rect(0, height * 2 / 3, width, height / 3);
 
-  // An example of drawing an irregular polygon
-  fill(hillColor);
+  // draw skyline
+  fill(landColor);
   beginShape();
-  vertex(0, height / 2);
-  const steps = 10;
-  for (let i = 0; i < steps + 1; i++) {
-    let x = (width * i) / steps;
-    let y =
-      height / 2 - (random() * random() * random() * height) / 8 - height / 50;
-    vertex(x, y);
+  vertex(0, height * 2 / 3);
+  const numBuild = 10;
+  for (let i = 0; i < numBuild; i++) {
+    let x = (width / 2 * i) / numBuild;
+    let y = height * 2 / 3 - (random() * random() * random() * height) / 8 - height / 70;
+    vertex(x, y)
   }
-  vertex(width, height / 2);
+  vertex(width / 2, height * 2 / 3);
   endShape(CLOSE);
 
-  const trees = 5*random();
-  for (let i = 0; i < trees; i++) {
-    drawLtree();
+  const build = 6 * random();
+  for (let i = 0; i < build; i++) {
+    addBuilding();
   }
+  
+  function addBuilding() {
+    let x = width / 2 * (random()) - 50;
+    let h = int(random(30, 75));
+    let y = height * 2 / 3 - h;
+    let w = int(random(15, 35));
+    
 
-  // An example of recursively drawing an L-tree 
-  function drawLtree() {
-    let x = width * random();
-    let y = height/2 + height/8 * random();
-    let s = width/200 + (y - height/2)/2;
-    let jitter = (mouseX - width/2) / width * 2 * Math.PI / 180;
-    drawLtreeBranch(x, y, s, (-90 * Math.PI / 180) + jitter, 0, 5); // this angle points north (0 is east)
-  }  
-
-  function drawLtreeBranch(x, y, s, angle, max_limit, branch_weight) { // s is length of a segment
-    stroke(treeColor);
-    strokeWeight(branch_weight);
-    let v = p5.Vector.fromAngle(angle, s);
-    let vx = v.x;
-    let vy = v.y; 
-    let x1 = x;
-    let y1 = y; 
-    let x2 = x1 + vx;
-    let y2 = y1 + vy;
-    line(x1, y1, x2, y2);
-
-    let new_s = s * 0.7;
-    let new_max = max_limit + random();
-    let new_branch_weight = branch_weight - 1;
-    new_branch_weight = max(new_branch_weight, 1);
-
-    if (max_limit < 3) {
-        if (random() < 1/3) {
-            drawLtreeBranch(x2, y2, new_s, (-35 * Math.PI / 180) + angle, new_max, new_branch_weight);
-        } else if (random() > 1/3) {
-            drawLtreeBranch(x2, y2, new_s, (35 * Math.PI / 180) + angle, new_max, new_branch_weight);
-        } else {
-            drawLtreeBranch(x2, y2, new_s, (-35 * Math.PI / 180) + angle, new_max, new_branch_weight);
-            drawLtreeBranch(x2, y2, new_s, (35 * Math.PI / 180) + angle, new_max, new_branch_weight);
-        }
-        drawLtreeBranch(x2, y2, new_s, angle, new_max, new_branch_weight);
-    }
-    else {
-        if (random() < 1/3) {
-            drawLeave(x2, y2, new_s, (-35 * Math.PI / 180) + angle);
-        } else if (random() > 1/3) {
-            drawLeave(x2, y2, new_s, (35 * Math.PI / 180) + angle);
-        } else {
-            drawLeave(x2, y2, new_s, (-35 * Math.PI / 180) + angle);
-            drawLeave(x2, y2, new_s, (35 * Math.PI / 180) + angle);
-        }
-    }
+    fill(buildColor);
+    rect(x, y, w, h);
 
   }
 
-  function drawLeave(x, y, s, angle) {
-    fill(leaveColor);
-    noStroke();
-    let v = p5.Vector.fromAngle(angle, s);
-    let vx = v.x;
-    let vy = v.y; 
-    let x1 = x;
-    let y1 = y; 
-    let x2 = x1 + vx;
-    let y2 = y1 + vy;
-    line(x1, y1, x2, y2);
-    circle(x2, y2, 3);
-
+  if (mouseY < height / 2) {
+    landColor = "#184505";
+    buildColor = "#ff4800";
+    oceanColor = "#0b254a";
+    skyColor = "#cdd8e6";
+  } else if (mouseY < height * 2 / 3) {
+    landColor = "#545017";
+    buildColor = "#993d0b";
+    oceanColor = "#104b52";
+    skyColor = "#f5853b";
+  } else if (mouseY < height * 3 / 4 + 17) {
+    landColor = "#142e09";
+    buildColor = "#471b06";
+    oceanColor = "#290340";
+    skyColor = "#a31847";
+  } else {
+    landColor = "#3d023a";
+    buildColor = "#2b0129";
+    oceanColor = "#000000";
+    skyColor = "#2d3233";
   }
+
+
 }
 
